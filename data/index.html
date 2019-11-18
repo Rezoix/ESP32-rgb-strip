@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Led Strip</title>
+</head>
+<body style="text-align:center; background-color:black" onresize="resizePicker()">
+	<script src="jquery.js"></script>
+	<script src="iro.js"></script>
+
+	<div id="picker"></div>
+
+	<script>
+		var ratio = 0.88
+
+		var windowWidth = window.innerWidth * 0.95;
+		var windowHeight = window.innerHeight * 0.95;
+
+		var windowRatio = windowWidth / windowHeight;
+
+		var pickerWidth = 0;
+
+		if (windowRatio > ratio) {
+			pickerWidth = windowHeight * ratio;
+		} else {
+			pickerWidth = windowWidth;
+		}
+
+		var colorPicker = new iro.ColorPicker('#picker', {
+			width: pickerWidth,
+			color: "#FFFFFF",
+			borderWidth: 5,
+			borderColor: "darkgrey",
+			handleRadius: 12,
+			sliderHeight: 60
+		});
+	</script>
+
+	<script>
+		function resizePicker() {
+			windowWidth = window.innerWidth * 0.95;
+			windowHeight = window.innerHeight * 0.95;
+
+			windowRatio = windowWidth / windowHeight;
+
+			if (windowRatio > ratio) {
+				colorPicker.resize(windowHeight * ratio);
+			} else {
+				colorPicker.resize(windowWidth);
+			}
+
+			
+		}
+	</script>
+
+	<script>
+		function onColorChange(color, changes) {
+			var path = "/get?res="+color.hexString.slice(1);
+			$.post(path);
+		}
+		colorPicker.on('input:change', onColorChange);
+	</script>
+
+	<!-- https://iro.js.org/guide.htm -->
+
+
+</body>
+</html>
