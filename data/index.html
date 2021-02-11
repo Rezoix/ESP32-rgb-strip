@@ -84,11 +84,27 @@
 	</script>
 
 	<script>
+		function throttle(func, wait) {
+			var thr;
+			return function() {
+				var context = this
+				var args = arguments;
+
+				if (!thr) {
+					func.apply(context, args);
+					thr = true;
+					setTimeout(function() {thr = false}, wait);
+				}
+			}
+		}
+	</script>
+
+	<script>
 		function onColorChange(color, changes) {
 			var path = "/get?res="+color.hexString.slice(1);
 			$.post(path);
 		}
-		colorPicker.on('input:change', onColorChange);
+		colorPicker.on('input:change', throttle(onColorChange, 25));
 	</script>
 
 	<!-- https://iro.js.org/guide.htm -->
