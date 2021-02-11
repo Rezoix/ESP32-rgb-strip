@@ -29,6 +29,7 @@
 			<button class="button" type="button" onclick="onButtonPress(1)">Cycle</button>
 			<button class="button" type="button">TBD</button>
 			<button class="button" type="button">TBD</button>
+			<input type="range" min="0.0" max="10.0" value="1.0" step="0.01" id="cycleRate">
 		</div>
 		<div id="picker"></div>
 	</div>
@@ -84,7 +85,7 @@
 	</script>
 
 	<script>
-		function throttle(func, wait) {
+		function throttle(func, wait = 25) {
 			var thr;
 			return function() {
 				var context = this
@@ -101,10 +102,21 @@
 
 	<script>
 		function onColorChange(color, changes) {
-			var path = "/get?res="+color.hexString.slice(1);
+			var path = "/get?color="+color.hexString.slice(1);
 			$.post(path);
 		}
-		colorPicker.on('input:change', throttle(onColorChange, 25));
+		colorPicker.on('input:change', throttle(onColorChange));
+	</script>
+
+	<script>
+		var cycleRateSlider = document.getElementById("cycleRate");
+		var i = 0;
+
+		cycleRateSlider.addEventListener("change", throttle(function() {
+			var path = "/get?rate="+this.value;
+			$.post(path);
+		}));
+		
 	</script>
 
 	<!-- https://iro.js.org/guide.htm -->

@@ -10,15 +10,15 @@ const uint16_t PixelCount = 16;
 const uint8_t PixelPin = 26;  
 
 //Modes
+//Off: -1
 //Static: 0
 //Color cycle: 1
-uint8_t mode = 1; 
+uint8_t mode = -1; 
 
 NeoPixelBus<NeoBrgFeature, Neo400KbpsMethod> strip(PixelCount, PixelPin);
 
 uint8_t brightness = 255; //0-255
 double hue = 0.0;
-double lightness = 0.7;
 double value = 1.0;
 double saturation = 1.0;
 double rate = 1.0;
@@ -61,20 +61,30 @@ void setup()
   server.on("/get", HTTP_POST, [](AsyncWebServerRequest *request){
     String inputMessage;
 
-    if (request->hasParam("res") && mode == 0) {
-      inputMessage = request->getParam("res")->value();
+    if (request->hasParam("color")) {
+      inputMessage = request->getParam("color")->value();
       request->send(200);
       RgbColor color = parseHex(inputMessage);
-      for (uint16_t pixel = 0; pixel < PixelCount; pixel++)
-      {
-          strip.SetPixelColor(pixel, color);
+      if (mode == 0) {
+        for (uint16_t pixel = 0; pixel < PixelCount; pixel++)
+        {
+            strip.SetPixelColor(pixel, color);
+        }
+        strip.Show();
       }
-      strip.Show();
+    } else if (request->hasParam("rate")) {
+      inputMessage = request->getParam("rate")->value();
+      request->send(200);
+      rate = strtod(inputMessage.c_str(), NULL);
     } else if (request->hasParam("mode")) {
       if (request->hasParam("mode")) {
         inputMessage = request->getParam("mode")->value();
         request->send(200);
         mode = inputMessage.toInt();
+
+        if (mode == -1) {
+          strip.ClearTo(RgbColor(0,0,0));
+        }
       }
     } else {
       request->send(400);
