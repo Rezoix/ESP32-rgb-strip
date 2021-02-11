@@ -3,11 +3,42 @@
 <head>
 	<title>Led Strip</title>
 </head>
+<style>
+	.button {
+		background-color: #F0F0F0;
+		border: none;
+		color: black;
+		padding: 12px 24px;
+		margin: 10px;
+		text-align: center;
+		display: inline-block;
+		font-size: 16px;
+		transition-duration: 0.4s;
+	}
+	.button:hover {
+		background-color: lime;
+	}
+</style>
 <body style="text-align:center; background-color:black" onresize="resizePicker()">
 	<script src="jquery.js"></script>
 	<script src="iro.js"></script>
+	<div id="root" style="display: flex;flex-direction: column;justify-content: center;">
+		<div id="buttons" style="display: flex;flex-direction: row;justify-content: left;">
+			<button class="button" type="button" onclick="onButtonPress(-1)">OFF</button>
+			<button class="button" type="button" onclick="onButtonPress(0)">Static</button>
+			<button class="button" type="button" onclick="onButtonPress(1)">Cycle</button>
+			<button class="button" type="button">TBD</button>
+			<button class="button" type="button">TBD</button>
+		</div>
+		<div id="picker"></div>
+	</div>
 
-	<div id="picker"></div>
+	<script>
+		function onButtonPress(mode) {
+			let path = "/get?mode="+mode;
+			$.post(path);
+		}
+	</script>
 
 	<script>
 		var ratio = 0.88
