@@ -24,8 +24,8 @@ double saturation = 1.0;
 double rate = 1.0;
 
 // Server stuff
-const char* ssid = ***REMOVED***;
-const char* passwd = ***REMOVED***;
+const char* ssid = "***REMOVED***";
+const char* passwd = "***REMOVED***";
 AsyncWebServer server(80);
 
 void setup()
