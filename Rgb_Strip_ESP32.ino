@@ -19,7 +19,7 @@ String mode = "off";
 
 NeoPixelBus<NeoBrgFeature, Neo400KbpsMethod> strip(PixelCount, PixelPin);
 
-uint8_t brightness = 255; //0-255
+double brightness = 1.0; //0-1.0
 String colorHex = "ffffff";
 double hue = 0.0;
 double value = 1.0;
@@ -51,13 +51,23 @@ void setup()
 
   Serial.println(WiFi.localIP());
 
+  serverSetup();
+
+  strip.Begin();
+}
+
+
+void serverSetup() 
+{
   //Static site
   server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
   server.serveStatic("/static/css/", SPIFFS, "/css/");
   server.serveStatic("/static/js/", SPIFFS, "/js/");
 
 
-
+  //GET '/get' COMMANDS
+  //
+  //CurrentValues
   server.on("/get", HTTP_GET, [](AsyncWebServerRequest *request) {
 
     Serial.println("Get received");
@@ -67,7 +77,7 @@ void setup()
       String message = "{";
       message += "\"mode\": \"" + mode + "\",";
       message += "\"color\": \"#" + colorHex + "\",";
-      message += "\"brightness\": " + String(brightness) + ",";
+      message += "\"brightness\": " + String(brightness*255) + ",";
       message += "\"rate\": " + String(rate);
       message += "}";
 
@@ -76,25 +86,47 @@ void setup()
     }
   });
 
-
-
-
+  //POST '/set' COMMANDS
+  //
+  //Mode, Color, Brightness, Rate
   server.on("/set", HTTP_POST, [](AsyncWebServerRequest *request) {
     String inputMessage;
 
-    if (request->hasParam("color"))
+
+    if (request->hasParam("mode"))
+    {
+      inputMessage = request->getParam("mode")->value();
+      request->send(200);
+      mode = inputMessage;
+
+      if (mode == "off")
+      {
+        strip.ClearTo(RgbColor(0,0,0));
+        strip.Show();
+      }
+      else if (mode == "static")
+      {
+        setColor(colorHex);
+      }
+    }
+    else if (request->hasParam("color"))
     {
       inputMessage = request->getParam("color")->value();
       request->send(200);
-      RgbColor color = parseHex(inputMessage);
       if (mode == "static")
       {
         colorHex = inputMessage;
-        for (uint16_t pixel = 0; pixel < PixelCount; pixel++)
-        {
-          strip.SetPixelColor(pixel, color);
-        }
-        strip.Show();
+        setColor(inputMessage);
+      }
+    }
+    else if (request->hasParam("brightness"))
+    {
+      inputMessage = request->getParam("brightness")->value();
+      request->send(200);
+      brightness = strtod(inputMessage.c_str(), NULL) / 255.0;
+      if (mode == "static") 
+      {
+        updateColor();
       }
     }
     else if (request->hasParam("rate"))
@@ -103,19 +135,6 @@ void setup()
       request->send(200);
       rate = strtod(inputMessage.c_str(), NULL);
     }
-    else if (request->hasParam("mode"))
-    {
-      if (request->hasParam("mode"))
-      {
-        inputMessage = request->getParam("mode")->value();
-        request->send(200);
-        mode = inputMessage;
-
-        if (mode == "off")
-        {
-        }
-      }
-    }
     else
     {
       request->send(400);
@@ -123,7 +142,6 @@ void setup()
   });
 
   server.begin();
-  strip.Begin();
 }
 
 RgbColor parseHex(String hex)
@@ -139,53 +157,34 @@ RgbColor parseHex(String hex)
   return RgbColor(0, 0, 0);
 }
 
-//Hue 0-360, Saturation 0.0-1.0, Value 0.0-1.0
-RgbColor HsvToRgb(double hue, double sat, double val)
+void setColor(RgbColor color)
 {
-  double r, g, b = 0.0;
-  double max = val * 255;
-  double min = max * (1.0 - sat);
-
-  uint16_t i = ((uint16_t)hue) / 60;
-  double mod = fmod(hue, 60.0);
-
-  double adj = (max - min) * mod / 60.0;
-
-  switch (i)
+  for (uint16_t pixel = 0; pixel < PixelCount; pixel++)
   {
-    case 0:
-      r = max;
-      g = min + adj;
-      b = min;
-      break;
-    case 1:
-      r = max - adj;
-      g = max;
-      b = min;
-      break;
-    case 2:
-      r = min;
-      g = max;
-      b = min + adj;
-      break;
-    case 3:
-      r = min;
-      g = max - adj;
-      b = max;
-      break;
-    case 4:
-      r = min + adj;
-      g = min;
-      b = max;
-      break;
-    case 5:
-    default:
-      r = max;
-      g = min;
-      b = max - adj;
+    strip.SetPixelColor(pixel, color);
   }
+  strip.Show();
+}
 
-  return RgbColor(r, g, b);
+void setColor(HsbColor color)
+{
+  for (uint16_t pixel = 0; pixel < PixelCount; pixel++)
+  {
+    strip.SetPixelColor(pixel, color);
+  }
+  strip.Show();
+}
+
+void setColor(String hex)
+{
+  RgbColor color = parseHex(hex);
+  setColor(color);
+}
+
+void updateColor()
+{
+  RgbColor color = parseHex(colorHex);
+  setColor(color);
 }
 
 void loop()
@@ -193,14 +192,9 @@ void loop()
   if (mode == "cycle")
   {
     hue = fmod(hue + rate, 360.0);
+    HsbColor color = HsbColor(hue/360, saturation, brightness);
+    setColor(color);
 
-    RgbColor color = HsvToRgb(hue, saturation, value);
-
-    for (uint16_t pixel = 0; pixel < PixelCount; pixel++)
-    {
-      strip.SetPixelColor(pixel, color);
-    }
-    strip.Show();
     delay(10);
   }
 }
