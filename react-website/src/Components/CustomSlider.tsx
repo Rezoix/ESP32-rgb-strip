@@ -24,7 +24,7 @@ export const CustomSlider: FunctionComponent<SliderProps> = (props: SliderProps)
     props.setValue(value);
   };
 
-  const throttledOnChange = throttle((event: any, value: any) => onChange(event, value), 50);
+  const throttledOnChange = throttle((event: any, value: any) => onChange(event, value));
 
   return (
     <>
