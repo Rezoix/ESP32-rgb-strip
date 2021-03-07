@@ -1,11 +1,4 @@
-import React, {
-  createRef,
-  FunctionComponent,
-  MutableRefObject,
-  RefObject,
-  useEffect,
-  useRef,
-} from "react";
+import React, { createRef, FunctionComponent, MutableRefObject, RefObject, useEffect, useRef } from "react";
 import iro from "@jaames/iro";
 import { IroColorPicker } from "@jaames/iro/dist/ColorPicker";
 import { throttle } from "../util";
@@ -16,12 +9,8 @@ interface ColorPickerProps {
   setColor: React.Dispatch<React.SetStateAction<string>>;
 }
 
-export const ColorPicker: FunctionComponent<ColorPickerProps> = (
-  props: ColorPickerProps
-) => {
-  let colorPicker: MutableRefObject<IroColorPicker | null> = useRef<IroColorPicker | null>(
-    null
-  );
+export const ColorPicker: FunctionComponent<ColorPickerProps> = (props: ColorPickerProps) => {
+  let colorPicker: MutableRefObject<IroColorPicker | null> = useRef<IroColorPicker | null>(null);
   let el: RefObject<HTMLDivElement> = createRef<HTMLDivElement>();
 
   const onChange = (color: string) => {

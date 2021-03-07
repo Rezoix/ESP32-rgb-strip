@@ -11,9 +11,7 @@ interface SliderProps {
   type: string;
 }
 
-export const CustomSlider: FunctionComponent<SliderProps> = (
-  props: SliderProps
-) => {
+export const CustomSlider: FunctionComponent<SliderProps> = (props: SliderProps) => {
   const onChange = (event: any, value: any) => {
     const url = "/set?" + props.type + "=" + value;
 
@@ -26,15 +24,12 @@ export const CustomSlider: FunctionComponent<SliderProps> = (
     props.setValue(value);
   };
 
-  const throttledOnChange = throttle(
-    (event: any, value: any) => onChange(event, value),
-    50
-  );
+  const throttledOnChange = throttle((event: any, value: any) => onChange(event, value), 50);
 
   return (
     <>
       <Slider
-        defaultValue={props.value}
+        value={props.value}
         valueLabelDisplay="auto"
         min={props.range[0]}
         max={props.range[1]}

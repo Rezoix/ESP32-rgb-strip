@@ -23,11 +23,7 @@ export const StateSelect: FunctionComponent<ModeProps> = (props: ModeProps) => {
 
   return (
     <>
-      <Button
-        variant="contained"
-        color={props.mode === props.buttonMode ? "primary" : "secondary"}
-        onClick={onClick}
-      >
+      <Button variant="contained" color={props.mode === props.buttonMode ? "primary" : "secondary"} onClick={onClick}>
         {props.buttonMode}
       </Button>
     </>
