@@ -1,3 +1,4 @@
 .vscode
 data_old
 .vs/slnx.sqlite
+secrets.h
