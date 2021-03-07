@@ -14,7 +14,7 @@ export const ColorPicker: FunctionComponent<ColorPickerProps> = (props: ColorPic
   let el: RefObject<HTMLDivElement> = createRef<HTMLDivElement>();
 
   const onChange = (color: string) => {
-    const url = "/set?color=" + color;
+    const url = "/set?color=" + color.slice(1);
 
     axios.post(url).catch((e) => {
       console.log("Error: Failed to change mode");
@@ -25,7 +25,7 @@ export const ColorPicker: FunctionComponent<ColorPickerProps> = (props: ColorPic
     props.setColor(color);
   };
 
-  const throttledOnChange = throttle((color: string) => onChange(color), 50);
+  const throttledOnChange = throttle((color: string) => onChange(color));
 
   useEffect(() => {
     if (!el.current) {
